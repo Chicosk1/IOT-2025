@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <title>Dashboard do Sensor de Gás</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="page">
+        <div class="layout">
+            <header class="topbar">
+                <div>
+                    <div class="topbar-title">Monitor de Gás</div>
+                    <div class="topbar-subtitle">
+                        Leituras em tempo quase real do sensor conectado ao Raspberry Pi
+                    </div>
+                </div>
+                <div class="topbar-badge">
+                    <span class="badge-dot"></span>
+                    <span>Online</span>
+                </div>
+            </header>
+
+            <main class="content">
+                <section class="panel main-panel">
+                    <div class="panel-header">
+                        <h2>Visão geral</h2>
+                        <p>Nível relativo de gás com base no sinal do sensor.</p>
+                    </div>
+
+                    <div class="level-container">
+                        <div class="level-header">
+                            <div>
+                                <div class="level-label">Nível atual</div>
+                                <div class="level-value">
+                                    <span id="gas-value">--</span>
+                                    <span class="level-unit">%</span>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="status-pill status-normal" id="status-pill">
+                                    <span class="status-dot"></span>
+                                    <span id="status-text">Aguardando leitura</span>
+                                </div>
+                                <div class="last-update">
+                                    Última atualização: <span id="last-update">--</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="level-bar">
+                            <div class="level-bar-fill" id="gas-bar-fill"></div>
+                            <div class="level-bar-zones">
+                                <span class="zone-normal">Normal</span>
+                                <span class="zone-atencao">Atenção</span>
+                                <span class="zone-perigo">Perigo</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="panel metrics-panel">
+                    <div class="panel-header">
+                        <h2>Métricas do sensor</h2>
+                        <p>Resumo estatístico das leituras desde o início da execução.</p>
+                    </div>
+
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-label">Mínimo observado</div>
+                            <div class="metric-value">
+                                <span id="gas-min">--</span><span class="metric-unit">%</span>
+                            </div>
+                            <div class="metric-help">
+                                Menor nível desde que o script foi iniciado.
+                            </div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-label">Máximo observado</div>
+                            <div class="metric-value">
+                                <span id="gas-max">--</span><span class="metric-unit">%</span>
+                            </div>
+                            <div class="metric-help">
+                                Maior nível registrado até o momento.
+                            </div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-label">Média geral</div>
+                            <div class="metric-value">
+                                <span id="gas-avg">--</span><span class="metric-unit">%</span>
+                            </div>
+                            <div class="metric-help">
+                                Média de todas as leituras coletadas.
+                            </div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-label">Total de leituras</div>
+                            <div class="metric-value">
+                                <span id="gas-samples">--</span>
+                            </div>
+                            <div class="metric-help">
+                                Quantidade de amostras recebidas do sensor.
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="panel info-panel">
+                    <div class="panel-header">
+                        <h2>Faixas de interpretação</h2>
+                        <p>Limiares utilizados para classificar o nível do gás.</p>
+                    </div>
+
+                    <ul class="ranges-list">
+                        <li>
+                            <strong>0% a 40%:</strong> faixa considerada normal. LED verde aceso.
+                        </li>
+                        <li>
+                            <strong>40% a 70%:</strong> atenção. Nenhum LED aceso, indica aumento.
+                        </li>
+                        <li>
+                            <strong>70% a 100%:</strong> perigo. LED vermelho aceso.
+                        </li>
+                    </ul>
+
+                    <p class="info-note">
+                        Os valores exibidos representam uma escala relativa baseada na saída do módulo
+                        do sensor. Para uso em produção, ajuste a calibração conforme o modelo do sensor
+                        e o ambiente.
+                    </p>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        async function atualizarDados() {
+            try {
+                const resp = await fetch('/data');
+                if (!resp.ok) {
+                    throw new Error('Erro ao obter /data');
+                }
+
+                const dados = await resp.json();
+
+                const gasValueEl = document.getElementById('gas-value');
+                const gasMinEl = document.getElementById('gas-min');
+                const gasMaxEl = document.getElementById('gas-max');
+                const gasAvgEl = document.getElementById('gas-avg');
+                const gasSamplesEl = document.getElementById('gas-samples');
+
+                const statusTextEl = document.getElementById('status-text');
+                const statusPillEl = document.getElementById('status-pill');
+                const lastUpdateEl = document.getElementById('last-update');
+                const gasBarFillEl = document.getElementById('gas-bar-fill');
+
+                const nivel = dados.gas_level || 0;
+                const minNivel = dados.min_level || 0;
+                const maxNivel = dados.max_level || 0;
+                const avgNivel = dados.avg_level || 0;
+
+                gasValueEl.textContent = nivel.toFixed ? nivel.toFixed(1) : nivel;
+                gasMinEl.textContent = minNivel.toFixed ? minNivel.toFixed(1) : minNivel;
+                gasMaxEl.textContent = maxNivel.toFixed ? maxNivel.toFixed(1) : maxNivel;
+                gasAvgEl.textContent = avgNivel.toFixed ? avgNivel.toFixed(1) : avgNivel;
+                gasSamplesEl.textContent = dados.samples_count || 0;
+
+                statusTextEl.textContent = dados.status || '—';
+                lastUpdateEl.textContent = dados.last_update || '—';
+
+                const pct = Math.max(0, Math.min(100, nivel));
+                gasBarFillEl.style.width = pct + '%';
+
+                statusPillEl.classList.remove('status-normal', 'status-atencao', 'status-perigo');
+                switch (dados.status_level) {
+                    case 'atencao':
+                        statusPillEl.classList.add('status-atencao');
+                        break;
+                    case 'perigo':
+                        statusPillEl.classList.add('status-perigo');
+                        break;
+                    default:
+                        statusPillEl.classList.add('status-normal');
+                        break;
+                }
+
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        atualizarDados();
+        setInterval(atualizarDados, 3000);
+    </script>
+</body>
+</html>
