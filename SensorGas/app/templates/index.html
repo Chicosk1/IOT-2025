@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monitor de Gás</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+  <div class="page">
+    <div class="layout container">
+      <header class="topbar header">
+        <div>
+          <div class="topbar-title">Monitor de Gás</div>
+          <div class="topbar-subtitle">
+            Acompanhamento em tempo quase real do nível de gás no ambiente
+          </div>
+        </div>
+        <div class="topbar-badge">
+          <span class="badge-dot"></span>
+          <span>Online</span>
+        </div>
+      </header>
+
+      <main class="content dashboard">
+        <!-- Card principal: nível atual -->
+        <section class="panel main-panel card">
+          <div class="panel-header">
+            <h2>Visão geral</h2>
+            <p>Nível relativo de gás com base no sinal do sensor.</p>
+          </div>
+
+          <div class="gas-display">
+            <div class="level-header">
+              <div>
+                <div class="level-label">Nível atual</div>
+                <div class="level-value">
+                  <span class="gas-value" id="gasLevel">--%</span>
+                  <span class="level-unit"> </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="progress-bar">
+              <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <div class="status-text" id="gasStatus">
+              Fazendo leitura...
+            </div>
+
+            <div class="last-update">
+              Última atualização:
+              <span id="gasLastUpdate">--</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Card de métricas -->
+        <section class="panel metrics-panel card">
+          <div class="panel-header">
+            <h2>Métricas do sensor</h2>
+            <p>Resumo estatístico das leituras desde o início da execução.</p>
+          </div>
+
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-label">Mínimo observado</div>
+              <div class="metric-value">
+                <span id="gasMin">--</span><span class="metric-unit">%</span>
+              </div>
+              <div class="metric-help">
+                Menor nível desde o início do monitoramento.
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-label">Máximo observado</div>
+              <div class="metric-value">
+                <span id="gasMax">--</span><span class="metric-unit">%</span>
+              </div>
+              <div class="metric-help">
+                Maior nível registrado até o momento.
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-label">Média geral</div>
+              <div class="metric-value">
+                <span id="gasAvg">--</span><span class="metric-unit">%</span>
+              </div>
+              <div class="metric-help">
+                Média de todas as leituras coletadas.
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-label">Total de leituras</div>
+              <div class="metric-value">
+                <span id="gasSamples">--</span>
+              </div>
+              <div class="metric-help">
+                Quantidade de amostras recebidas do sensor.
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Painel de faixas e controles -->
+        <section class="panel info-panel card">
+          <div class="panel-header">
+            <h2>Controles e faixas de interpretação</h2>
+            <p>Configure o monitoramento e veja como o nível é classificado.</p>
+          </div>
+
+          <div>
+            <strong>Monitoramento:</strong>
+            <span class="status-indicator status-monitorando" id="statusMonitoramento">
+              Carregando...
+            </span>
+          </div>
+
+          <div class="button-group">
+            <button class="btn btn-primary" onclick="alternarMonitoramento()" id="btnMonitoramento">
+              ⏯️ Ativar / Pausar Monitoramento
+            </button>
+          </div>
+
+          <div class="info-note" style="margin-top: 10px;">
+            <strong>Faixas de interpretação:</strong><br>
+            • 0% a 40% – nível considerado normal<br>
+            • 40% a 70% – atenção, monitorar tendência<br>
+            • 70% a 100% – nível perigoso, agir imediatamente
+          </div>
+        </section>
+
+        <!-- Logs -->
+        <section class="panel card" style="grid-column: 1 / -1;">
+          <div class="panel-header">
+            <h2>Logs do sistema</h2>
+            <p>Histórico de eventos e mudanças de estado do monitoramento.</p>
+          </div>
+
+          <div class="logs-container" id="logsContainer">
+            <div class="log-entry">Carregando logs...</div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
